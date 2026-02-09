@@ -83,7 +83,7 @@ button[onclick="addWide()"] {
 }
 
 button[onclick="addNoBall()"] {
-  background-color: #9c27b0;
+  /* background-color: #9c27b0; */
   color: white;
 }
 
@@ -92,10 +92,10 @@ button[onclick="addWicket()"] {
   color: white;
 }
 
-
-@media (max-width: 400px) {
-  #scoreBoard {
-    width: 90%;
-  }
+.card {
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  border-radius: 10px;
 }
+
+
 
