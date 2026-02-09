@@ -114,7 +114,7 @@ function renderMatches() {
 
         ${match.innings === 2 && !match.matchOver ? `
           <p class="text-danger fw-bold">
-            🎯 Target: ${match.firstInningScore + 1}
+             Target: ${match.firstInningScore + 1}
           </p>
         ` : ``}
 
@@ -145,7 +145,7 @@ function renderMatches() {
 function getTargetText(match) {
   if (match.innings === 2 && !match.matchOver) {
     const target = match.firstInningScore + 1;
-    return `🎯 Target for ${match.battingTeam}: ${target}`;
+    return ` Target for ${match.battingTeam}: ${target}`;
   }
   return "";
 }
