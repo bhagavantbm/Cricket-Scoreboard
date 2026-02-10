@@ -128,7 +128,7 @@ function renderCurrentMatches() {
   const container = document.getElementById("matchesContainer");
   container.innerHTML = "";
 
-  // No ongoing matches
+ 
   if (currentMatches.length === 0) {
     container.innerHTML = `
       <div class="card text-center p-4">
