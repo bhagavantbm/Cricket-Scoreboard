@@ -1,101 +1,50 @@
 body {
-  font-family: Arial, Helvetica, sans-serif;
-  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-  color: #fff;
-  margin: 0;
-  padding: 0;
-}
-
-h2 {
-  text-align: center;
-  margin-top: 20px;
-  color: #0a0a00;
-}
-
-
-div {
-  text-align: center;
-  color: #0a0a00;
-}
-
-input {
-  padding: 8px 10px;
-  width: 200px;
-  border-radius: 5px;
-  border: none;
-  outline: none;
-  margin: 5px;
-}
-
-button {
-  padding: 8px 14px;
-  margin: 5px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-button:hover {
-  opacity: 0.9;
-}
-
-
-button[onclick="startMatch()"] {
-  background-color: #ff9800;
-  color: #000;
-}
-
-
-#scoreBoard {
-  background: #ffffff;
-  color: #000;
-  width: 350px;
-  margin: 30px auto;
+  background-color: #f4f6f9;
   padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-  text-align: center;
 }
 
-#battingTeam {
-  margin-bottom: 10px;
-  color: #2c5364;
+/* Top buttons */
+.top-bar button {
+  min-width: 120px;
 }
 
-
-p {
-  font-size: 16px;
-  margin: 8px 0;
+/* Add match form */
+.form-card {
+  max-width: 400px;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-
-button[onclick^="addRun"] {
-  background-color: #4caf50;
-  color: white;
-  width: 45px;
-}
-
-
-button[onclick="addWide()"] {
-  background-color: #03a9f4;
-  color: white;
-}
-
-button[onclick="addNoBall()"] {
-  /* background-color: #9c27b0; */
-  color: white;
-}
-
-button[onclick="addWicket()"] {
-  background-color: #f44336;
-  color: white;
-}
-
-.card {
+/* Match cards */
+.match-card {
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 20px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  border-radius: 10px;
 }
 
+/* History cards */
+.history-card {
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  border-left: 5px solid #0d6efd;
+  background: #fbcccc;
+}
 
+/* Message box inside match card */
+.msg {
+  background-color: #eef2ff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  margin-bottom: 10px;
+  color: rgb(238, 123, 123);
+}
 
+.result-text {
+  font-weight: bold;
+  color: #198754;
+  margin-top: 6px;
+}
