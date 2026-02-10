@@ -85,7 +85,7 @@ class Match {
 }
 
 
-let currentMatch = null;
+let currentMatches = [];
 let historyMatches = [];
 let matchId = 0;
 
@@ -97,8 +97,10 @@ function createMatch() {
 
   if (!teamA || !teamB || !overs) return;
 
-  currentMatch = new Match(teamA, teamB, overs, matchId++);
-  renderCurrentMatch();
+  const match = new Match(teamA, teamB, overs, matchId++); 
+  currentMatches.push(match);                             
+
+  renderCurrentMatches();  
   showCurrentMatches();
 }
 
@@ -118,45 +120,65 @@ function getResult(match) {
   }
 
   
-  return "Match Tied 🤝";
+  return "Match Tied 🙏";
 }
 
 
-function renderCurrentMatch() {
+function renderCurrentMatches() {
   const container = document.getElementById("matchesContainer");
   container.innerHTML = "";
 
-  if (!currentMatch) return;
-
-  const card = document.createElement("div");
-  card.className = "card match-card";
-
-  card.innerHTML = `
-    <h5>${currentMatch.teamA} vs ${currentMatch.teamB}</h5>
-    <div class="msg">${currentMatch.message}</div>
-
-    ${!currentMatch.battingTeam ? `
-      <button class="btn btn-warning btn-sm" onclick="doToss()">Toss</button>
-    ` : `
-      <p><b>Batting:</b> ${currentMatch.battingTeam}</p>
-      <p>Score: ${currentMatch.score}/${currentMatch.wickets}</p>
-      <p>Overs: ${currentMatch.overs}.${currentMatch.balls}</p>
-      <p>Last Ball:
-        <span class="badge bg-info">${currentMatch.lastBallRun}</span>
-      </p>
-
-      <div class="balls-line">
-        ${renderBalls(currentMatch.ballsHistory)}
+  // No ongoing matches
+  if (currentMatches.length === 0) {
+    container.innerHTML = `
+      <div class="card text-center p-4">
+        <h5 class="text-muted">No matches are currently ongoing</h5>
+        <button class="btn btn-primary mt-2" onclick="showAddMatch()">
+          ➕ Add Match
+        </button>
       </div>
+    `;
+    return;
+  }
 
+  const row = document.createElement("div");
+  row.className = "row";
 
-      ${!currentMatch.matchOver ? `
-        <button class="btn btn-success btn-sm" onclick="hitBall()">HIT</button>
-      ` : ``}
-    `}
-  `;
+  currentMatches.forEach(match => {
+    const col = document.createElement("div");
+    col.className = "col-12 col-md-6 col-lg-4";
 
-  container.appendChild(card);
+    const card = document.createElement("div");
+    card.className = "card match-card mb-3";
+
+    card.innerHTML = `
+      <h5>${match.teamA} vs ${match.teamB}</h5>
+      <div class="msg">${match.message}</div>
+
+      ${!match.battingTeam ? `
+        <button class="btn btn-warning btn-sm"
+          onclick="doToss(${match.id})">Toss</button>
+      ` : `
+        <p><b>Batting:</b> ${match.battingTeam}</p>
+        <p>Score: ${match.score}/${match.wickets}</p>
+        <p>Overs: ${match.overs}.${match.balls}</p>
+
+        <div class="balls-line">
+          ${renderBalls(match.ballsHistory)}
+        </div>
+
+        ${!match.matchOver ? `
+          <button class="btn btn-success btn-sm mt-2"
+            onclick="hitBall(${match.id})">HIT</button>
+        ` : ``}
+      `}
+    `;
+
+    col.appendChild(card);
+    row.appendChild(col);
+  });
+
+  container.appendChild(row);
 }
 
 
@@ -208,29 +230,35 @@ function renderBalls(balls) {
 }
 
 
-function doToss() {
-  currentMatch.toss();
-  renderCurrentMatch();
+function doToss(id) {
+  const match = currentMatches.find(m => m.id === id);
+  if (!match) return;
+
+  match.toss();
+  renderCurrentMatches();
 }
 
-function hitBall() {
-  currentMatch.hit();
+function hitBall(id) {
+  const match = currentMatches.find(m => m.id === id);
+  if (!match) return;
 
-  if (currentMatch.matchOver) {
+  match.hit();
+
+  if (match.matchOver) {
     historyMatches.push({
-      teamA: currentMatch.teamA,
-      teamB: currentMatch.teamB,
-      firstBattingTeam: currentMatch.firstBattingTeam,
-      firstInningScore: currentMatch.firstInningScore,
-      secondInningScore: currentMatch.score,
-      ballsHistory: [...currentMatch.ballsHistory],
-      result: getResult(currentMatch)
+      teamA: match.teamA,
+      teamB: match.teamB,
+      firstBattingTeam: match.firstBattingTeam,
+      firstInningScore: match.firstInningScore,
+      secondInningScore: match.score,
+      ballsHistory: [...match.ballsHistory],
+      result: getResult(match)
     });
 
-    currentMatch = null;
+    currentMatches = currentMatches.filter(m => m.id !== id);
   }
 
-  renderCurrentMatch();
+  renderCurrentMatches();
 }
 
 
