@@ -16,11 +16,10 @@ class Match {
 
     this.firstInningScore = null;
     this.lastBallRun = "-";
-    this.ballsHistory = [];   
+    this.ballsHistory = [];
     this.message = "Click Toss to start";
     this.matchOver = false;
   }
-
 
   toss() {
     const tossWinner = Math.random() < 0.5 ? this.teamA : this.teamB;
@@ -35,12 +34,12 @@ class Match {
     this.message = `${tossWinner} won the toss. ${this.battingTeam} will bat first`;
   }
 
-
   hit() {
     if (this.matchOver) return;
+
     const outcomes = [0, 1, 2, 3, 4, 6, "W"];
     const result = outcomes[Math.floor(Math.random() * outcomes.length)];
-
+    // this.ballsHistory.push("|");
     if (result === "W") {
       this.wickets++;
       this.lastBallRun = "W";
@@ -53,14 +52,12 @@ class Match {
 
     this.balls++;
 
-    // over completed
     if (this.balls === 6) {
       this.overs++;
       this.balls = 0;
-      this.ballsHistory.push("|"); 
+      this.ballsHistory.push("|");
     }
 
-    // Innings end
     if (this.overs === this.totalOvers) {
       if (this.innings === 1) {
         this.firstInningScore = this.score;
@@ -75,20 +72,19 @@ class Match {
           this.battingTeam === this.teamA ? this.teamB : this.teamA;
 
         this.message = `Target for ${this.battingTeam}: ${this.firstInningScore + 1}`;
-        this.ballsHistory.push("Second Inning | ");
+        this.ballsHistory.push("Second Inning");
       } else {
         this.matchOver = true;
         this.message = getResult(this);
+        confetti();
       }
     }
   }
 }
 
-
 let currentMatches = [];
 let historyMatches = [];
 let matchId = 0;
-
 
 function createMatch() {
   const teamA = teamAInput.value.trim();
@@ -97,10 +93,10 @@ function createMatch() {
 
   if (!teamA || !teamB || !overs) return;
 
-  const match = new Match(teamA, teamB, overs, matchId++); 
-  currentMatches.push(match);                             
+  const match = new Match(teamA, teamB, overs, matchId++);
+  currentMatches.push(match);
 
-  renderCurrentMatches();  
+  renderCurrentMatches();
   showCurrentMatches();
 }
 
@@ -119,16 +115,13 @@ function getResult(match) {
     return `${defendingTeam} won the match by ${runsLeft} runs 🎉`;
   }
 
-  
   return "Match Tied 🙏";
 }
-
 
 function renderCurrentMatches() {
   const container = document.getElementById("matchesContainer");
   container.innerHTML = "";
 
- 
   if (currentMatches.length === 0) {
     container.innerHTML = `
       <div class="card text-center p-4">
@@ -149,21 +142,23 @@ function renderCurrentMatches() {
     col.className = "col-12 col-md-6 col-lg-4";
 
     const card = document.createElement("div");
-    card.className = "card match-card mb-3";
+    card.className = "card shadow-sm rounded-3 p-3 mb-3 animate-card";
 
     card.innerHTML = `
       <h5>${match.teamA} vs ${match.teamB}</h5>
-      <div class="msg">${match.message}</div>
+      <div class="bg-primary-subtle  small rounded-2 p-2 mb-2">
+        ${match.message}
+      </div>
 
       ${!match.battingTeam ? `
-        <button class="btn btn-warning btn-sm"
+        <button class="btn btn-primary btn-sm"
           onclick="doToss(${match.id})">Toss</button>
       ` : `
         <p><b>Batting:</b> ${match.battingTeam}</p>
         <p>Score: ${match.score}/${match.wickets}</p>
         <p>Overs: ${match.overs}.${match.balls}</p>
 
-        <div class="balls-line">
+        <div class="small text-muted ">
           ${renderBalls(match.ballsHistory)}
         </div>
 
@@ -181,7 +176,6 @@ function renderCurrentMatches() {
   container.appendChild(row);
 }
 
-
 function renderHistory() {
   historyContainer.innerHTML = "";
 
@@ -190,47 +184,54 @@ function renderHistory() {
     return;
   }
 
+  const row = document.createElement("div");
+  row.className = "row .text-body-emphasis";
+
   historyMatches.forEach(match => {
+
+    const col = document.createElement("div");
+    col.className = "col-12 col-lg-4 "; showCurrentMatches
+
     const card = document.createElement("div");
-    card.className = "card history-card";
+    card.className = "card shadow-sm rounded-3 p-2 mb-3 ";
 
     card.innerHTML = `
       <h6>${match.teamA} vs ${match.teamB}</h6>
-
-      <p>
-        <b>${match.firstBattingTeam}</b> (1st Innings):
-        ${match.firstInningScore}
-      </p>
-
-      <p>
-        <b>${match.firstBattingTeam === match.teamA ? match.teamB : match.teamA}</b>
-        (2nd Innings):
-        ${match.secondInningScore}
-      </p>
-
-      <div class="balls-line">
-        ${renderBalls(match.ballsHistory)}
+      <div class="fw-bold text-success mt-1 mb-2">
+        ${match.result}
       </div>
 
-      <div class="result-text">${match.result}</div>
-    `;
+      <p><b>${match.firstBattingTeam}</b> (1st Innings): ${match.firstInningScore}</p>
+      <p><b>${match.firstBattingTeam === match.teamA ? match.teamB : match.teamA}</b>
+         (2nd Innings): ${match.secondInningScore}</p>
 
-    historyContainer.appendChild(card);
+      <div class="small text-muted border p-1">
+        ${renderBalls(match.ballsHistory)}
+      </div> `;
+
+    col.appendChild(card);
+    row.appendChild(col);
   });
+
+  historyContainer.appendChild(row);
 }
-
-
-
 function renderBalls(balls) {
-  return balls.map(b =>
-    b === "|"
-      ? `<span class="over-sep"> | </span>`
-      : `<span class="ball">${b}</span>`
-  ).join(" ");
+  return balls.map(b => {
+
+    if (b === "|") {
+      return `<span class="fw-bold text-muted fs-2"> | </span>`;
+    }
+
+    if (b === "W") {
+      return `<span class="btn btn-primary btn-sm mb-3 p-2 rounded-circle">W</span>`;
+    }
+
+    return `<span class="run-ball btn btn-success btn-sm mb-3 p-2 rounded-circle">${b}</span>`;
+
+  }).join(" ");
 }
 
-
-function doToss(id) {
+function doToss(id) { history
   const match = currentMatches.find(m => m.id === id);
   if (!match) return;
 
@@ -263,22 +264,25 @@ function hitBall(id) {
 
 
 function showAddMatch() {
-  matchFormSection.style.display = "block";
-  currentMatchSection.style.display = "none";
-  historySection.style.display = "none";
+  matchFormSection.classList.remove("d-none");
+  currentMatchSection.classList.add("d-none");
+  historySection.classList.add("d-none");
+
   form.classList.remove("was-validated");
 }
 
 function showCurrentMatches() {
-  matchFormSection.style.display = "none";
-  currentMatchSection.style.display = "block";
-  historySection.style.display = "none";
+  matchFormSection.classList.add("d-none");
+  currentMatchSection.classList.remove("d-none");
+  historySection.classList.add("d-none");
+  renderCurrentMatches();
 }
 
 function showHistory() {
-  matchFormSection.style.display = "none";
-  currentMatchSection.style.display = "none";
-  historySection.style.display = "block";
+  matchFormSection.classList.add("d-none");
+  currentMatchSection.classList.add("d-none");
+  historySection.classList.remove("d-none");
+
   renderHistory();
 }
 
