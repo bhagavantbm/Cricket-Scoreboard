@@ -16,7 +16,8 @@ class Match {
 
     this.firstInningScore = null;
     this.lastBallRun = "-";
-    this.ballsHistory = [];
+    this.firstInningsBalls = [];
+    this.secondInningsBalls = [];
     this.message = "Click Toss to start";
     this.matchOver = false;
   }
@@ -34,56 +35,80 @@ class Match {
     this.message = `${tossWinner} won the toss. ${this.battingTeam} will bat first`;
   }
 
-  hit() {
-    if (this.matchOver) return;
+hit() {
+  if (this.matchOver) return;
 
-    const outcomes = [0, 1, 2, 3, 4, 6, "W"];
-    const result = outcomes[Math.floor(Math.random() * outcomes.length)];
-    // this.ballsHistory.push("|");
-    if (result === "W") {
-      this.wickets++;
-      this.lastBallRun = "W";
-      this.ballsHistory.push("W");
+  const outcomes = [0, 1, 2, 3, 4, 6, "W"];
+  const result = outcomes[Math.floor(Math.random() * outcomes.length)];
+
+  if (result === "W") {
+    this.wickets++;
+    this.lastBallRun = "W";
+
+    if (this.innings === 1) {
+      this.firstInningsBalls.push("W");
     } else {
-      this.score += result;
-      this.lastBallRun = result;
-      this.ballsHistory.push(result);
+      this.secondInningsBalls.push("W");
     }
 
-    this.balls++;
+  } else {
+    this.score += result;
+    this.lastBallRun = result;
 
-    if (this.balls === 6) {
-      this.overs++;
-      this.balls = 0;
-      this.ballsHistory.push("|");
-    }
-
-    if (this.overs === this.totalOvers) {
-      if (this.innings === 1) {
-        this.firstInningScore = this.score;
-
-        this.innings = 2;
-        this.score = 0;
-        this.wickets = 0;
-        this.overs = 0;
-        this.balls = 0;
-
-        this.battingTeam =
-          this.battingTeam === this.teamA ? this.teamB : this.teamA;
-
-        this.message = `Target for ${this.battingTeam}: ${this.firstInningScore + 1}`;
-        this.ballsHistory.push("Second Inning");
-      } else {
-        this.matchOver = true;
-        this.message = getResult(this);
-        confetti();
-      }
+    if (this.innings === 1) {
+      this.firstInningsBalls.push(result);
+    } else {
+      this.secondInningsBalls.push(result);
     }
   }
+
+  this.balls++;
+
+  if (this.balls === 6) {
+    this.overs++;
+    this.balls = 0;
+
+    if (this.innings === 1) {
+      this.firstInningsBalls.push("|");
+    } else {
+      this.secondInningsBalls.push("|");
+    }
+  }
+
+  // 🔥 Chase win condition
+  if (this.innings === 2 && this.score > this.firstInningScore) {
+    this.matchOver = true;
+    this.message = getResult(this);
+    confetti();
+    return;
+  }
+
+  if (this.overs === this.totalOvers) {
+    if (this.innings === 1) {
+      this.firstInningScore = this.score;
+
+      this.innings = 2;
+      this.score = 0;
+      this.wickets = 0;
+      this.overs = 0;
+      this.balls = 0;
+
+      this.battingTeam =
+        this.battingTeam === this.teamA ? this.teamB : this.teamA;
+
+      this.message = `Target for ${this.battingTeam}: ${this.firstInningScore + 1}`;
+    } else {
+      this.matchOver = true;
+      this.message = getResult(this);
+      confetti();
+    }
+  }
+}
 }
 
 let currentMatches = [];
 let historyMatches = [];
+
 let matchId = 0;
 
 function createMatch() {
@@ -146,7 +171,7 @@ function renderCurrentMatches() {
 
     card.innerHTML = `
       <h5>${match.teamA} vs ${match.teamB}</h5>
-      <div class="bg-primary-subtle  small rounded-2 p-2 mb-2">
+      <div class="small rounded-2 p-2 mb-2 text-primary">
         ${match.message}
       </div>
 
@@ -159,13 +184,29 @@ function renderCurrentMatches() {
         <p>Overs: ${match.overs}.${match.balls}</p>
 
         <div class="small text-muted ">
-          ${renderBalls(match.ballsHistory)}
+          <div>
+            <div><b>1st Innings</b></div>
+              ${renderBalls(match.firstInningsBalls)}
+            </div>
+
+            <div class="mt-2">
+              <div><b>2nd Innings</b></div>
+              ${renderBalls(match.secondInningsBalls)}
+            </div>
         </div>
 
-        ${!match.matchOver ? `
-          <button class="btn btn-success btn-sm mt-2"
+       ${!match.matchOver ? `
+          <button class="btn btn-primary btn-sm mt-2"
             onclick="hitBall(${match.id})">HIT</button>
-        ` : ``}
+        ` : `
+          <div class="mt-2">
+            <button class="btn btn-outline-primary me-2"
+              onclick="replayMatch(${match.id})">Replay</button>
+
+            <button class="btn btn-outline-primary "
+              onclick="moveToHistory(${match.id})">History</button>
+          </div>
+        `}
       `}
     `;
 
@@ -206,8 +247,16 @@ function renderHistory() {
          (2nd Innings): ${match.secondInningScore}</p>
 
       <div class="small text-muted border p-1">
-        ${renderBalls(match.ballsHistory)}
-      </div> `;
+        <div>
+  <div><b>1st Innings</b></div>
+  ${renderBalls(match.firstInningsBalls)}
+        </div>
+
+        <div class="mt-2">
+          <div><b>2nd Innings</b></div>
+          ${renderBalls(match.secondInningsBalls)}
+        </div>
+        </div> `;
 
     col.appendChild(card);
     row.appendChild(col);
@@ -223,11 +272,17 @@ function renderBalls(balls) {
     }
 
     if (b === "W") {
-      return `<span class="btn btn-primary btn-sm mb-3 p-2 rounded-circle">W</span>`;
+      return `<span class="btn btn-primary btn-sm mb-3 d-inline-flex align-items-center justify-content-center 
+      rounded-circle" 
+      style="width:40px; height:40px;"">W</span>`;
     }
 
-    return `<span class="run-ball btn btn-success btn-sm mb-3 p-2 rounded-circle">${b}</span>`;
-
+      return `<span class="run-ball btn btn-secondary btn-sm mb-3 
+      d-inline-flex align-items-center justify-content-center 
+      rounded-circle" 
+      style="width:40px; height:40px;">
+      ${b}
+      </span>`;
   }).join(" ");
 }
 
@@ -244,21 +299,6 @@ function hitBall(id) {
   if (!match) return;
 
   match.hit();
-
-  if (match.matchOver) {
-    historyMatches.push({
-      teamA: match.teamA,
-      teamB: match.teamB,
-      firstBattingTeam: match.firstBattingTeam,
-      firstInningScore: match.firstInningScore,
-      secondInningScore: match.score,
-      ballsHistory: [...match.ballsHistory],
-      result: getResult(match)
-    });
-
-    currentMatches = currentMatches.filter(m => m.id !== id);
-  }
-
   renderCurrentMatches();
 }
 
@@ -268,8 +308,10 @@ function showAddMatch() {
   currentMatchSection.classList.add("d-none");
   historySection.classList.add("d-none");
 
+  form.reset();
   form.classList.remove("was-validated");
 }
+
 
 function showCurrentMatches() {
   matchFormSection.classList.add("d-none");
@@ -284,6 +326,45 @@ function showHistory() {
   historySection.classList.remove("d-none");
 
   renderHistory();
+}
+function replayMatch(id) {
+      const match = currentMatches.find(m => m.id === id);
+      if (!match) return;
+
+      match.innings = 1;
+      match.score = 0;
+      match.wickets = 0;
+      match.overs = 0;
+      match.balls = 0;
+      match.firstInningScore = null;
+      match.matchOver = false;
+
+      match.firstInningsBalls = [];
+      match.secondInningsBalls = [];
+
+      match.battingTeam = match.firstBattingTeam;
+      match.message = "Match restarted";
+
+      renderCurrentMatches();
+}
+function moveToHistory(id) {
+  const match = currentMatches.find(m => m.id === id);
+  if (!match) return;
+
+  historyMatches.push({
+    teamA: match.teamA,
+    teamB: match.teamB,
+    firstBattingTeam: match.firstBattingTeam,
+    firstInningScore: match.firstInningScore,
+    secondInningScore: match.score,
+    firstInningsBalls: [...match.firstInningsBalls],
+    secondInningsBalls: [...match.secondInningsBalls],
+    result: getResult(match)
+  });
+
+  currentMatches = currentMatches.filter(m => m.id !== id);
+
+  renderCurrentMatches();
 }
 
 

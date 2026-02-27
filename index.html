@@ -13,7 +13,7 @@
 
 </head>
 
-<body class="bg-light" style="font-family: Arial,  sans-serif;">
+<body class="bg-light text-dark" style="font-family: Arial,  sans-serif;">
 
 <div class="container py-3">
 
@@ -49,16 +49,20 @@
           <input id="teamB" class="form-control mb-2" placeholder="Team B" required>
           <div class="invalid-feedback mb-1">Enter Team B</div>
 
-          <input id="overs" type="number"
-                 class="form-control mb-3"
-                 placeholder="Overs"
-                 min="1" required>
+          <select id="overs" class="form-select mb-3" required>
+            <option value="" disabled selected>Select Overs</option>
+            <option value="1">1 Over</option>
+            <option value="2">2 Overs</option>
+            <option value="3">3 Overs</option>
+            <option value="4">4 Overs</option>
+            <option value="5">5 Overs</option>
+          </select>
           <div class="invalid-feedback mb-1">
             Overs must be ≥ 1
           </div>
 
           
-          <button type="submit" class="btn btn-success w-100">
+          <button type="submit" class="btn btn-primary w-100">
             Create Match
           </button>
 
@@ -70,7 +74,7 @@
 
  
   <div id="currentMatchSection" class="d-none">
-    <h5 class="mb-3 text-primary">Current Matches</h5>
+    <h5 class="mb-3 text-dark">Current Matches</h5>
     <div id="matchesContainer"></div>
   </div>
 
