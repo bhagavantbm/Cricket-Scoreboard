@@ -22,18 +22,24 @@ class Match {
     this.matchOver = false;
   }
 
-  toss() {
-    const tossWinner = Math.random() < 0.5 ? this.teamA : this.teamB;
-    const batFirst = Math.random() < 0.5;
+ toss() {
+  const tossWinner = Math.random() < 0.5 ? this.teamA : this.teamB;
 
-    this.battingTeam = batFirst
-      ? tossWinner
-      : tossWinner === this.teamA ? this.teamB : this.teamA;
+  const decision = Math.random() < 0.5 ? "bat" : "bowl";
 
-    this.firstBattingTeam = this.battingTeam;
+  let battingFirst;
 
-    this.message = `${tossWinner} won the toss. ${this.battingTeam} will bat first`;
+  if (decision === "bat") {
+    battingFirst = tossWinner;
+  } else {
+    battingFirst = tossWinner === this.teamA ? this.teamB : this.teamA;
   }
+
+  this.battingTeam = battingFirst;
+  this.firstBattingTeam = battingFirst;
+
+  this.message = `${tossWinner} won the toss and decided to ${decision}. ${battingFirst} will bat first.`;
+}
 
 hit() {
   if (this.matchOver) return;
@@ -75,7 +81,7 @@ hit() {
     }
   }
 
-  // 🔥 Chase win condition
+  
   if (this.innings === 2 && this.score > this.firstInningScore) {
     this.matchOver = true;
     this.message = getResult(this);
@@ -115,8 +121,15 @@ function createMatch() {
   const teamA = teamAInput.value.trim();
   const teamB = teamBInput.value.trim();
   const overs = +oversInput.value;
+  const errorDiv = document.getElementById("formError");
+  errorDiv.textContent = ""; 
 
   if (!teamA || !teamB || !overs) return;
+
+   if (teamA.toLowerCase() === teamB.toLowerCase()) {
+     errorDiv.textContent = "Team A and Team B cannot be the same!";
+     return;
+  }
 
   const match = new Match(teamA, teamB, overs, matchId++);
   currentMatches.push(match);
@@ -327,26 +340,31 @@ function showHistory() {
 
   renderHistory();
 }
+
 function replayMatch(id) {
-      const match = currentMatches.find(m => m.id === id);
-      if (!match) return;
+  const match = currentMatches.find(m => m.id === id);
+  if (!match) return;
 
-      match.innings = 1;
-      match.score = 0;
-      match.wickets = 0;
-      match.overs = 0;
-      match.balls = 0;
-      match.firstInningScore = null;
-      match.matchOver = false;
+  match.innings = 1;
+  match.score = 0;
+  match.wickets = 0;
+  match.overs = 0;
+  match.balls = 0;
+  match.firstInningScore = null;
+  match.matchOver = false;
 
-      match.firstInningsBalls = [];
-      match.secondInningsBalls = [];
+  match.firstInningsBalls = [];
+  match.secondInningsBalls = [];
 
-      match.battingTeam = match.firstBattingTeam;
-      match.message = "Match restarted";
+ 
+  match.battingTeam = null;
+  match.firstBattingTeam = null;
+  match.message = "Click Toss to start";
 
-      renderCurrentMatches();
+  renderCurrentMatches();
 }
+
+
 function moveToHistory(id) {
   const match = currentMatches.find(m => m.id === id);
   if (!match) return;
